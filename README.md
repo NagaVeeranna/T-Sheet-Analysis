@@ -62,15 +62,7 @@ Designed for data confidentiality with three distinct access levels:
    npm run dev
    ```
 
-## 📊 Default Credentials
-
-| Role | Username | Password |
-|------|----------|----------|
-| **Admin** | `admin` | `admin123` |
-| **Exam Cell** | `examcell` | `exam123` |
-| **Viewer** | `viewer` | `view123` |
-
-## 🚀 Usage
+##  Usage
 
 1. Open `http://localhost:5173`.
 2. Browse the **Landing Page** to see features.

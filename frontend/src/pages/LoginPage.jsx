@@ -232,18 +232,6 @@ const LoginPage = () => {
                         </Button>
                     </Stack>
                 </form>
-
-                {/* Role Hints */}
-                <Box sx={{ mt: 4, pt: 3, borderTop: '1px solid rgba(0, 0, 0, 0.06)' }}>
-                    <Typography variant="caption" color="text.secondary" display="block" textAlign="center" sx={{ mb: 1.5, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1 }}>
-                        Available Roles
-                    </Typography>
-                    <Stack direction="row" spacing={1} justifyContent="center" flexWrap="wrap">
-                        <Chip label="Admin" size="small" sx={{ bgcolor: 'rgba(79, 70, 229, 0.08)', color: '#4f46e5', fontWeight: 600, fontSize: '0.7rem' }} />
-                        <Chip label="Exam Cell" size="small" sx={{ bgcolor: 'rgba(16, 185, 129, 0.08)', color: '#059669', fontWeight: 600, fontSize: '0.7rem' }} />
-                        <Chip label="Viewer" size="small" sx={{ bgcolor: 'rgba(245, 158, 11, 0.08)', color: '#d97706', fontWeight: 600, fontSize: '0.7rem' }} />
-                    </Stack>
-                </Box>
             </Paper>
         </Box>
     );
