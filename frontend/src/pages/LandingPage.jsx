@@ -10,6 +10,7 @@ import {
     useTheme,
     Chip,
     Stack,
+    IconButton,
 } from '@mui/material';
 import {
     CloudUpload as UploadIcon,
@@ -20,8 +21,13 @@ import {
     School as SchoolIcon,
     AutoGraph as AutoGraphIcon,
     ArrowForward as ArrowIcon,
+    Logout as LogoutIcon,
+    Visibility as ViewerIcon,
+    Login as LoginIcon,
 } from '@mui/icons-material';
 import axios from 'axios';
+import { useAuth } from '../AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const FeatureCard = ({ icon, title, description, gradient }) => (
     <Paper
@@ -92,6 +98,8 @@ const LandingPage = ({ onUpload }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const theme = useTheme();
+    const { user, logout, canUpload } = useAuth();
+    const navigate = useNavigate();
 
     const processFile = async (file) => {
         if (!file || !file.name.endsWith('.pdf')) {
@@ -197,16 +205,28 @@ const LandingPage = ({ onUpload }) => {
                         </Typography>
                     </Typography>
                 </Stack>
-                <Chip
-                    label="v2.0"
-                    size="small"
-                    sx={{
-                        bgcolor: 'rgba(79, 70, 229, 0.08)',
-                        color: 'primary.main',
-                        fontWeight: 700,
-                        fontSize: '0.7rem',
-                    }}
-                />
+                <Stack direction="row" alignItems="center" spacing={2}>
+                    {user ? (
+                        <>
+                            <Typography variant="body2" fontWeight="600" color="text.secondary">
+                                Welcome, {user.display_name}
+                            </Typography>
+                            <IconButton onClick={logout} size="small" sx={{ color: 'text.secondary' }}>
+                                <LogoutIcon fontSize="small" />
+                            </IconButton>
+                        </>
+                    ) : (
+                        <Button
+                            variant="outlined"
+                            size="small"
+                            startIcon={<LoginIcon />}
+                            onClick={() => navigate('/login')}
+                            sx={{ borderRadius: 2 }}
+                        >
+                            Sign In
+                        </Button>
+                    )}
+                </Stack>
             </Box>
 
             <Container maxWidth="lg">
@@ -265,111 +285,201 @@ const LandingPage = ({ onUpload }) => {
                     </Typography>
 
                     {/* Upload Section */}
-                    <Paper
-                        elevation={0}
-                        sx={{
-                            maxWidth: 620,
-                            mx: 'auto',
-                            borderRadius: 5,
-                            border: isDragging
-                                ? '2px dashed rgba(79, 70, 229, 0.5)'
-                                : '2px dashed rgba(79, 70, 229, 0.15)',
-                            background: isDragging
-                                ? 'rgba(79, 70, 229, 0.03)'
-                                : 'rgba(255, 255, 255, 0.7)',
-                            backdropFilter: 'blur(10px)',
-                            transition: 'all 0.3s ease',
-                            overflow: 'hidden',
-                            '&:hover': {
-                                border: '2px dashed rgba(79, 70, 229, 0.35)',
-                                background: 'rgba(255, 255, 255, 0.9)',
-                            },
-                        }}
-                    >
-                        {loading && <LinearProgress sx={{ borderRadius: 0 }} />}
-
-                        <label htmlFor="upload-landing">
-                            <input
-                                accept="application/pdf"
-                                id="upload-landing"
-                                type="file"
-                                hidden
-                                onChange={handleFileUpload}
-                            />
-                            <Box
-                                onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
-                                onDragLeave={() => setIsDragging(false)}
-                                onDrop={(e) => { e.preventDefault(); setIsDragging(false); processFile(e.dataTransfer.files[0]); }}
+                    {!user ? (
+                        <Paper
+                            elevation={0}
+                            sx={{
+                                maxWidth: 620,
+                                mx: 'auto',
+                                borderRadius: 5,
+                                border: '2px dashed rgba(79, 70, 229, 0.15)',
+                                background: 'rgba(255, 255, 255, 0.7)',
+                                backdropFilter: 'blur(10px)',
+                                py: 6,
+                                px: 4,
+                                textAlign: 'center',
+                            }}
+                        >
+                            <Box sx={{
+                                width: 72,
+                                height: 72,
+                                borderRadius: '50%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                background: 'rgba(79, 70, 229, 0.08)',
+                                mx: 'auto',
+                                mb: 2,
+                            }}>
+                                <LoginIcon sx={{ fontSize: 32, color: 'primary.main' }} />
+                            </Box>
+                            <Typography variant="h6" fontWeight="600" color="text.primary" sx={{ mb: 1 }}>
+                                Authorized Access Only
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
+                                Please sign in with your credentials to upload and analyze T-Sheet data.
+                            </Typography>
+                            <Button
+                                variant="contained"
+                                size="large"
+                                startIcon={<LoginIcon />}
+                                onClick={() => navigate('/login')}
                                 sx={{
-                                    py: 5,
-                                    px: 4,
-                                    cursor: 'pointer',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                    gap: 2,
+                                    borderRadius: 3,
+                                    px: 6,
+                                    py: 1.5,
+                                    background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
+                                    boxShadow: '0 4px 16px rgba(79, 70, 229, 0.3)',
+                                    '&:hover': {
+                                        background: 'linear-gradient(135deg, #4338ca 0%, #6d28d9 100%)',
+                                        boxShadow: '0 6px 24px rgba(79, 70, 229, 0.4)',
+                                    }
                                 }}
                             >
-                                <Box sx={{
-                                    width: 72,
-                                    height: 72,
-                                    borderRadius: '50%',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    background: isDragging
-                                        ? 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)'
-                                        : 'rgba(79, 70, 229, 0.08)',
-                                    transition: 'all 0.3s ease',
-                                    mb: 1,
-                                }}>
-                                    <UploadIcon sx={{
-                                        fontSize: 32,
-                                        color: isDragging ? '#fff' : 'primary.main',
-                                        transition: 'all 0.3s ease',
-                                    }} />
-                                </Box>
+                                Sign In to Access
+                            </Button>
+                        </Paper>
+                    ) : canUpload ? (
+                        <Paper
+                            elevation={0}
+                            sx={{
+                                maxWidth: 620,
+                                mx: 'auto',
+                                borderRadius: 5,
+                                border: isDragging
+                                    ? '2px dashed rgba(79, 70, 229, 0.5)'
+                                    : '2px dashed rgba(79, 70, 229, 0.15)',
+                                background: isDragging
+                                    ? 'rgba(79, 70, 229, 0.03)'
+                                    : 'rgba(255, 255, 255, 0.7)',
+                                backdropFilter: 'blur(10px)',
+                                transition: 'all 0.3s ease',
+                                overflow: 'hidden',
+                                '&:hover': {
+                                    border: '2px dashed rgba(79, 70, 229, 0.35)',
+                                    background: 'rgba(255, 255, 255, 0.9)',
+                                },
+                            }}
+                        >
+                            {loading && <LinearProgress sx={{ borderRadius: 0 }} />}
 
-                                <Typography variant="h6" fontWeight="600" color={isDragging ? 'primary.main' : 'text.primary'}>
-                                    {isDragging ? 'Drop your PDF here' : 'Upload T-Sheet PDF'}
-                                </Typography>
-
-                                <Typography variant="body2" color="text.secondary">
-                                    Drag & drop your file here, or click to browse
-                                </Typography>
-
-                                <Button
-                                    variant="contained"
-                                    size="large"
-                                    startIcon={<UploadIcon />}
-                                    endIcon={<ArrowIcon />}
-                                    component="span"
+                            <label htmlFor="upload-landing">
+                                <input
+                                    accept="application/pdf"
+                                    id="upload-landing"
+                                    type="file"
+                                    hidden
+                                    onChange={handleFileUpload}
+                                />
+                                <Box
+                                    onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                                    onDragLeave={() => setIsDragging(false)}
+                                    onDrop={(e) => { e.preventDefault(); setIsDragging(false); processFile(e.dataTransfer.files[0]); }}
                                     sx={{
-                                        mt: 1,
-                                        borderRadius: 3,
+                                        py: 5,
                                         px: 4,
-                                        py: 1.2,
-                                        background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
-                                        boxShadow: '0 4px 16px rgba(79, 70, 229, 0.3)',
-                                        '&:hover': {
-                                            background: 'linear-gradient(135deg, #4338ca 0%, #6d28d9 100%)',
-                                            boxShadow: '0 6px 24px rgba(79, 70, 229, 0.4)',
-                                        }
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        gap: 2,
                                     }}
                                 >
-                                    Choose File
-                                </Button>
-                            </Box>
-                        </label>
+                                    <Box sx={{
+                                        width: 72,
+                                        height: 72,
+                                        borderRadius: '50%',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        background: isDragging
+                                            ? 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)'
+                                            : 'rgba(79, 70, 229, 0.08)',
+                                        transition: 'all 0.3s ease',
+                                        mb: 1,
+                                    }}>
+                                        <UploadIcon sx={{
+                                            fontSize: 32,
+                                            color: isDragging ? '#fff' : 'primary.main',
+                                            transition: 'all 0.3s ease',
+                                        }} />
+                                    </Box>
 
-                        {error && (
-                            <Box sx={{ px: 3, pb: 2 }}>
-                                <Paper sx={{ p: 1.5, bgcolor: 'error.main', color: 'white', borderRadius: 2 }}>
-                                    <Typography variant="body2">{error}</Typography>
-                                </Paper>
+                                    <Typography variant="h6" fontWeight="600" color={isDragging ? 'primary.main' : 'text.primary'}>
+                                        {isDragging ? 'Drop your PDF here' : 'Upload T-Sheet PDF'}
+                                    </Typography>
+
+                                    <Typography variant="body2" color="text.secondary">
+                                        Drag & drop your file here, or click to browse
+                                    </Typography>
+
+                                    <Button
+                                        variant="contained"
+                                        size="large"
+                                        startIcon={<UploadIcon />}
+                                        endIcon={<ArrowIcon />}
+                                        component="span"
+                                        sx={{
+                                            mt: 1,
+                                            borderRadius: 3,
+                                            px: 4,
+                                            py: 1.2,
+                                            background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
+                                            boxShadow: '0 4px 16px rgba(79, 70, 229, 0.3)',
+                                            '&:hover': {
+                                                background: 'linear-gradient(135deg, #4338ca 0%, #6d28d9 100%)',
+                                                boxShadow: '0 6px 24px rgba(79, 70, 229, 0.4)',
+                                            }
+                                        }}
+                                    >
+                                        Choose File
+                                    </Button>
+                                </Box>
+                            </label>
+
+                            {error && (
+                                <Box sx={{ px: 3, pb: 2 }}>
+                                    <Paper sx={{ p: 1.5, bgcolor: 'error.main', color: 'white', borderRadius: 2 }}>
+                                        <Typography variant="body2">{error}</Typography>
+                                    </Paper>
+                                </Box>
+                            )}
+                        </Paper>
+                    ) : (
+                        <Paper
+                            elevation={0}
+                            sx={{
+                                maxWidth: 620,
+                                mx: 'auto',
+                                borderRadius: 5,
+                                border: '2px dashed rgba(245, 158, 11, 0.3)',
+                                background: 'rgba(255, 255, 255, 0.7)',
+                                py: 5,
+                                px: 4,
+                                textAlign: 'center',
+                            }}
+                        >
+                            <Box sx={{
+                                width: 72,
+                                height: 72,
+                                borderRadius: '50%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                background: 'rgba(245, 158, 11, 0.1)',
+                                mx: 'auto',
+                                mb: 2,
+                            }}>
+                                <ViewerIcon sx={{ fontSize: 32, color: '#d97706' }} />
                             </Box>
-                        )}
-                    </Paper>
+                            <Typography variant="h6" fontWeight="600" color="text.primary" sx={{ mb: 1 }}>
+                                View-Only Access
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                                You are logged in as a Viewer. Contact an Admin or Exam Cell Incharge to upload T-Sheet data.
+                            </Typography>
+                        </Paper>
+                    )}
                 </Box>
 
                 {/* Features Section */}

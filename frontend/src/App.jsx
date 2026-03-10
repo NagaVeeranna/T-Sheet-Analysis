@@ -15,7 +15,10 @@ import {
     ListItemText,
     Container,
     Paper,
-    Button
+    Button,
+    Chip,
+    Stack,
+    Avatar,
 } from '@mui/material';
 import {
     Menu as MenuIcon,
@@ -23,14 +26,16 @@ import {
     BarChart as AnalyticsIcon,
     CloudUpload as UploadIcon,
     ChevronLeft as ChevronLeftIcon,
-    Subject as SubjectIcon
+    Subject as SubjectIcon,
+    Logout as LogoutIcon,
 } from '@mui/icons-material';
 
+import { AuthProvider, useAuth } from './AuthContext';
 import Dashboard from './pages/Dashboard';
 import Analytics from './pages/Analytics';
 import SubjectDetail from './pages/SubjectDetail';
-import UploadZone from './components/UploadZone';
 import LandingPage from './pages/LandingPage';
+import LoginPage from './pages/LoginPage';
 
 const drawerWidth = 240;
 
@@ -38,11 +43,36 @@ const Layout = ({ children, data, onUpload }) => {
     const [open, setOpen] = useState(true);
     const location = useLocation();
     const navigate = useNavigate();
+    const { user, logout } = useAuth();
 
     const menuItems = [
         { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
         { text: 'Analytics', icon: <AnalyticsIcon />, path: '/analytics' },
     ];
+
+    const handleLogout = () => {
+        onUpload(null);
+        logout();
+        navigate('/');
+    };
+
+    const getRoleColor = (role) => {
+        switch (role) {
+            case 'admin': return '#4f46e5';
+            case 'examcell': return '#059669';
+            case 'viewer': return '#d97706';
+            default: return '#64748b';
+        }
+    };
+
+    const getRoleLabel = (role) => {
+        switch (role) {
+            case 'admin': return 'Admin';
+            case 'examcell': return 'Exam Cell';
+            case 'viewer': return 'Viewer';
+            default: return role;
+        }
+    };
 
     return (
         <Box sx={{ display: 'flex' }}>
@@ -57,16 +87,38 @@ const Layout = ({ children, data, onUpload }) => {
 
                     <Box sx={{ flexGrow: 1 }} />
 
-                    {data && (
-                        <Button
-                            variant="outlined"
-                            size="small"
-                            startIcon={<UploadIcon />}
-                            onClick={() => { navigate('/'); onUpload(null); }}
-                            sx={{ borderRadius: 2 }}
-                        >
-                            Upload New
-                        </Button>
+                    {user && (
+                        <Stack direction="row" spacing={2} alignItems="center">
+                            <Chip
+                                label={getRoleLabel(user.role)}
+                                size="small"
+                                sx={{
+                                    bgcolor: `${getRoleColor(user.role)}15`,
+                                    color: getRoleColor(user.role),
+                                    fontWeight: 700,
+                                    fontSize: '0.7rem',
+                                }}
+                            />
+                            <Typography variant="body2" fontWeight="600" color="text.secondary">
+                                {user.display_name}
+                            </Typography>
+
+                            {data && user.role !== 'viewer' && (
+                                <Button
+                                    variant="outlined"
+                                    size="small"
+                                    startIcon={<UploadIcon />}
+                                    onClick={() => { navigate('/'); onUpload(null); }}
+                                    sx={{ borderRadius: 2 }}
+                                >
+                                    Upload New
+                                </Button>
+                            )}
+
+                            <IconButton onClick={handleLogout} size="small" sx={{ color: 'text.secondary' }}>
+                                <LogoutIcon fontSize="small" />
+                            </IconButton>
+                        </Stack>
                     )}
                 </Toolbar>
             </AppBar>
@@ -146,22 +198,60 @@ const Layout = ({ children, data, onUpload }) => {
     );
 };
 
-const App = () => {
+const AppContent = () => {
     const [data, setData] = useState(null);
+    const { user, loading } = useAuth();
+
+    if (loading) {
+        return (
+            <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: '#0f172a' }}>
+                <Typography variant="h6" color="white">Loading...</Typography>
+            </Box>
+        );
+    }
 
     return (
+        <Routes>
+            {/* Public Landing Page */}
+            <Route path="/" element={
+                data ? (
+                    <Layout data={data} onUpload={setData}>
+                        <Dashboard data={data} />
+                    </Layout>
+                ) : (
+                    <LandingPage onUpload={setData} />
+                )
+            } />
+
+            {/* Login Page */}
+            <Route path="/login" element={<LoginPage />} />
+
+            {/* Protected Routes */}
+            <Route path="/analytics" element={
+                user && data ? (
+                    <Layout data={data} onUpload={setData}>
+                        <Analytics data={data} />
+                    </Layout>
+                ) : <LandingPage onUpload={setData} />
+            } />
+
+            <Route path="/subject/:subjectName" element={
+                user && data ? (
+                    <Layout data={data} onUpload={setData}>
+                        <SubjectDetail data={data} />
+                    </Layout>
+                ) : <LandingPage onUpload={setData} />
+            } />
+        </Routes>
+    );
+};
+
+const App = () => {
+    return (
         <Router>
-            {!data ? (
-                <LandingPage onUpload={setData} />
-            ) : (
-                <Layout data={data} onUpload={setData}>
-                    <Routes>
-                        <Route path="/" element={<Dashboard data={data} />} />
-                        <Route path="/analytics" element={<Analytics data={data} />} />
-                        <Route path="/subject/:subjectName" element={<SubjectDetail data={data} />} />
-                    </Routes>
-                </Layout>
-            )}
+            <AuthProvider>
+                <AppContent />
+            </AuthProvider>
         </Router>
     );
 };
