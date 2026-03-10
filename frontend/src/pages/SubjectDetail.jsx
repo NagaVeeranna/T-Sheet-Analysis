@@ -91,8 +91,8 @@ const SubjectDetail = ({ data }) => {
         let absentRolls = [];
         let allRolls = [];
 
-        data.results.forEach(s => {
-            const g = s.grades[subject];
+        (data?.results || []).forEach(s => {
+            const g = s.grades?.[subject];
             if (g) {
                 const resultStatus = g === 'AB' ? 'Absent' : (g === 'F' ? 'Failed' : 'Passed');
                 const studentData = {
@@ -141,8 +141,8 @@ const SubjectDetail = ({ data }) => {
     const chartData = useMemo(() => {
         if (!data) return [];
         const grades = {};
-        data.results.forEach(s => {
-            const g = s.grades[subject];
+        (data?.results || []).forEach(s => {
+            const g = s.grades?.[subject];
             if (g) grades[g] = (grades[g] || 0) + 1;
         });
 
@@ -154,8 +154,8 @@ const SubjectDetail = ({ data }) => {
 
     const rows = useMemo(() => {
         if (!data) return [];
-        return data.results
-            .filter(s => s.grades[subject])
+        return (data?.results || [])
+            .filter(s => s.grades?.[subject])
             .map((s, i) => ({
                 id: i,
                 regdNo: s.regdNo,
@@ -171,7 +171,7 @@ const SubjectDetail = ({ data }) => {
     ];
 
     if (!data) return <Navigate to="/" />;
-    if (!data.subjects.includes(subject)) return <Typography>Subject not found.</Typography>;
+    if (!data.subjects || !Array.isArray(data.subjects) || !data.subjects.includes(subject)) return <Typography>Subject not found.</Typography>;
 
     // Shared table component for side-by-side view in UI
     const StudentTables = () => (

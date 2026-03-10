@@ -83,11 +83,11 @@ const Analytics = ({ data }) => {
         // Define grade weights
         const weights = { 'A+': 10, 'A': 9, 'B': 8, 'C': 7, 'D': 6, 'E': 5, 'F': 0, 'AB': 0 };
 
-        return data.subjects.map(sub => {
+        return (data?.subjects || []).map(sub => {
             let totalPoints = 0;
             let count = 0;
-            data.results.forEach(s => {
-                const g = s.grades[sub];
+            (data?.results || []).forEach(s => {
+                const g = s.grades?.[sub];
                 if (g && weights[g] !== undefined) {
                     totalPoints += weights[g];
                     count++;
@@ -103,11 +103,11 @@ const Analytics = ({ data }) => {
     const subjectPassFailData = useMemo(() => {
         if (!data) return [];
 
-        return data.subjects.map(sub => {
+        return (data?.subjects || []).map(sub => {
             let passedRolls = [];
             let failedRolls = [];
-            data.results.forEach(s => {
-                const g = s.grades[sub];
+            (data?.results || []).forEach(s => {
+                const g = s.grades?.[sub];
                 if (g) {
                     const rollWithGrade = `${s.regdNo}(${g})`;
                     if (g === 'F' || g === 'AB') failedRolls.push(rollWithGrade);
@@ -127,7 +127,14 @@ const Analytics = ({ data }) => {
         });
     }, [data]);
 
-    if (!data) return <Typography>Please upload a T-Sheet first.</Typography>;
+    if (!data) return (
+        <Box sx={{ py: 10, textAlign: 'center' }}>
+            <Paper sx={{ p: 4, bgcolor: 'rgba(0,0,0,0.02)', borderRadius: 4, display: 'inline-block' }}>
+                <Typography variant="h6">No Data Available</Typography>
+                <Typography color="text.secondary">Please upload a T-Sheet file in the Dashboard to view analytics.</Typography>
+            </Paper>
+        </Box>
+    );
 
     return (
         <Box sx={{ pb: 4 }}>

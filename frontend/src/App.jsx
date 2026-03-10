@@ -174,7 +174,7 @@ const Layout = ({ children, data, onUpload }) => {
                             <Divider sx={{ my: 1 }} />
                             <Typography variant="overline" sx={{ px: 3, color: 'text.secondary', fontWeight: 'bold' }}>Subjects</Typography>
                             <List sx={{ maxHeight: '60vh', overflowY: 'auto' }}>
-                                {data.subjects.map((subject) => (
+                                {data?.subjects?.map((subject) => (
                                     <ListItem key={subject} disablePadding>
                                         <ListItemButton component={Link} to={`/subject/${encodeURIComponent(subject)}`}>
                                             <ListItemIcon sx={{ minWidth: 40 }}><SubjectIcon fontSize="small" /></ListItemIcon>
@@ -198,6 +198,50 @@ const Layout = ({ children, data, onUpload }) => {
     );
 };
 
+// Robust Error Boundary component
+class ErrorBoundary extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = { hasError: false, error: null };
+    }
+
+    static getDerivedStateFromError(error) {
+        return { hasError: true, error };
+    }
+
+    componentDidCatch(error, errorInfo) {
+        console.error("Uncaught error:", error, errorInfo);
+    }
+
+    render() {
+        if (this.state.hasError) {
+            return (
+                <Box sx={{ p: 5, textAlign: 'center', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: '#0f172a', color: 'white' }}>
+                    <Paper elevation={0} sx={{ p: 6, borderRadius: 4, bgcolor: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', maxWidth: 600 }}>
+                        <Typography variant="h4" fontWeight="bold" gutterBottom color="error.main">Oops! Something went wrong.</Typography>
+                        <Typography variant="body1" sx={{ mb: 4, opacity: 0.8 }}>The application encountered an unexpected error. This usually happens when the uploaded PDF has an irregular format.</Typography>
+                        <Button
+                            variant="contained"
+                            color="error"
+                            onClick={() => {
+                                localStorage.removeItem('token'); // Clear potentially bad state
+                                window.location.href = '/';
+                            }}
+                            sx={{ borderRadius: 2, px: 4, py: 1 }}
+                        >
+                            Reset Application
+                        </Button>
+                        <Typography variant="caption" display="block" sx={{ mt: 4, opacity: 0.5, fontFamily: 'monospace' }}>
+                            {this.state.error?.toString()}
+                        </Typography>
+                    </Paper>
+                </Box>
+            );
+        }
+        return this.props.children;
+    }
+}
+
 const AppContent = () => {
     const [data, setData] = useState(null);
     const { user, loading } = useAuth();
@@ -211,38 +255,40 @@ const AppContent = () => {
     }
 
     return (
-        <Routes>
-            {/* Public Landing Page */}
-            <Route path="/" element={
-                data ? (
-                    <Layout data={data} onUpload={setData}>
-                        <Dashboard data={data} />
-                    </Layout>
-                ) : (
-                    <LandingPage onUpload={setData} />
-                )
-            } />
+        <ErrorBoundary>
+            <Routes>
+                {/* Entry Route */}
+                <Route path="/" element={
+                    user ? (
+                        <Layout data={data} onUpload={setData}>
+                            <Dashboard data={data} onUpload={setData} />
+                        </Layout>
+                    ) : (
+                        <LandingPage onUpload={setData} />
+                    )
+                } />
 
-            {/* Login Page */}
-            <Route path="/login" element={<LoginPage />} />
+                {/* Login Page */}
+                <Route path="/login" element={<LoginPage />} />
 
-            {/* Protected Routes */}
-            <Route path="/analytics" element={
-                user && data ? (
-                    <Layout data={data} onUpload={setData}>
-                        <Analytics data={data} />
-                    </Layout>
-                ) : <LandingPage onUpload={setData} />
-            } />
+                {/* Protected Flow */}
+                <Route path="/analytics" element={
+                    user ? (
+                        <Layout data={data} onUpload={setData}>
+                            <Analytics data={data} />
+                        </Layout>
+                    ) : <LandingPage onUpload={setData} />
+                } />
 
-            <Route path="/subject/:subjectName" element={
-                user && data ? (
-                    <Layout data={data} onUpload={setData}>
-                        <SubjectDetail data={data} />
-                    </Layout>
-                ) : <LandingPage onUpload={setData} />
-            } />
-        </Routes>
+                <Route path="/subject/:subjectName" element={
+                    user ? (
+                        <Layout data={data} onUpload={setData}>
+                            <SubjectDetail data={data} />
+                        </Layout>
+                    ) : <LandingPage onUpload={setData} />
+                } />
+            </Routes>
+        </ErrorBoundary>
     );
 };
 
