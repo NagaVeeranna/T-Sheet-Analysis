@@ -397,7 +397,7 @@ const SubjectDetail = ({ data }) => {
                                 Sem: {data?.metadata?.courseSem || 'N/A'}
                             </Typography>
                             <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 1.5 }}>
-                                Course: {subject}
+                                Course: {subject} {data?.courseCodes?.[subject] ? `(${data.courseCodes[subject]})` : ''}
                             </Typography>
                         </Box>
 

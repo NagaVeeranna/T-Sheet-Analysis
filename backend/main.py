@@ -39,7 +39,8 @@ async def upload_pdf(file: UploadFile = File(...)):
             "studentCount": len(data["results"]),
             "subjects": data["subjects"],
             "results": data["results"],
-            "metadata": data.get("metadata", {})
+            "metadata": data.get("metadata", {}),
+            "courseCodes": data.get("courseCodes", {})
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

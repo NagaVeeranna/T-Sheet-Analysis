@@ -5,6 +5,7 @@ def extract_t_sheet_data(pdf_path):
     all_student_data = []
     current_student = None
     all_subjects = set()
+    course_codes = {}
     
     metadata = {
         "branch": "N/A",
@@ -39,6 +40,12 @@ def extract_t_sheet_data(pdf_path):
             grade_idx = header_row.index('Grade')
             sgpa_idx = header_row.index('SGPA')
             cgpa_idx = header_row.index('CGPA')
+            # Find Course Code column (header may contain newline)
+            course_code_idx = None
+            for idx, h in enumerate(header_row):
+                if h and 'Course Code' in h.replace('\n', ' '):
+                    course_code_idx = idx
+                    break
 
             for row in table[1:]:
                 # Check for a new student ID
@@ -61,6 +68,11 @@ def extract_t_sheet_data(pdf_path):
                     grade = row[grade_idx].strip()
                     current_student["grades"][subject] = grade
                     all_subjects.add(subject)
+                    # Extract course code if available
+                    if course_code_idx is not None and row[course_code_idx]:
+                        code = row[course_code_idx].replace('\n', ' ').strip()
+                        if code and subject not in course_codes:
+                            course_codes[subject] = code
                     
                     # Update SGPA/CGPA if they appear in later rows for the same student
                     if row[sgpa_idx]: current_student["sgpa"] = row[sgpa_idx]
@@ -88,7 +100,8 @@ def extract_t_sheet_data(pdf_path):
     return {
         "results": final_data,
         "subjects": sorted(list(all_subjects)),
-        "metadata": metadata
+        "metadata": metadata,
+        "courseCodes": course_codes
     }
 
 if __name__ == "__main__":
