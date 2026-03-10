@@ -62,6 +62,16 @@ Designed for data confidentiality with three distinct access levels:
    npm run dev
    ```
 
+## 🔐 Access Credentials
+
+For testing and administrative access, use the following credentials:
+
+- **Username**: `admin`
+- **Password**: `admin123`
+
+> [!IMPORTANT]
+> Change the default password in a production environment.
+
 ##  Usage
 
 1. Open `http://localhost:5173`.
