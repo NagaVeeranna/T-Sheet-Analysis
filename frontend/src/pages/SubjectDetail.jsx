@@ -88,6 +88,7 @@ const SubjectDetail = ({ data }) => {
         if (!data) return null;
         let passedRolls = [];
         let failedRolls = [];
+        let absentRolls = [];
         let allRolls = [];
 
         data.results.forEach(s => {
@@ -99,7 +100,8 @@ const SubjectDetail = ({ data }) => {
                     grade: g,
                     result: resultStatus
                 };
-                if (g === 'F' || g === 'AB') failedRolls.push(studentData);
+                if (g === 'AB') absentRolls.push(studentData);
+                else if (g === 'F') failedRolls.push(studentData);
                 else passedRolls.push(studentData);
                 allRolls.push(studentData);
             }
@@ -108,9 +110,11 @@ const SubjectDetail = ({ data }) => {
         // Sort all lists by regdNo
         passedRolls.sort((a, b) => a.regdNo.localeCompare(b.regdNo));
         failedRolls.sort((a, b) => a.regdNo.localeCompare(b.regdNo));
+        absentRolls.sort((a, b) => a.regdNo.localeCompare(b.regdNo));
         allRolls.sort((a, b) => a.regdNo.localeCompare(b.regdNo));
 
         const total = allRolls.length;
+        const appeared = total - absentRolls.length;
 
         // Chunking for PDF: 20 students per page for safer fit on A4
         const chunkSize = 20;
@@ -121,10 +125,13 @@ const SubjectDetail = ({ data }) => {
 
         return {
             total,
+            appeared,
             passed: passedRolls.length,
             failed: failedRolls.length,
+            absent: absentRolls.length,
             passedRolls,
             failedRolls,
+            absentRolls,
             allRolls,
             chunks,
             passPercentage: total > 0 ? ((passedRolls.length / total) * 100).toFixed(1) : 0
@@ -441,16 +448,35 @@ const SubjectDetail = ({ data }) => {
                             </Table>
                         </TableContainer>
 
-                        {/* Signatures - Only on the last page */}
+                        {/* Statistics & Signatures - Only on the last page */}
                         {chunkIndex === stats.chunks.length - 1 && (
-                            <Box sx={{ mt: 10, display: 'flex', justifyContent: 'space-between', px: 4 }}>
-                                <Typography variant="subtitle2" fontWeight="bold">
-                                    ExamCell-Incharge
-                                </Typography>
-                                <Typography variant="subtitle2" fontWeight="bold">
-                                    Head Of The Department (HOD)
-                                </Typography>
-                            </Box>
+                            <>
+                                {/* Statistics Summary */}
+                                <Box sx={{ mt: 3, px: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid #e0e0e0', borderRadius: 1, py: 1.2, bgcolor: '#f5f5f5' }}>
+                                    <Typography variant="subtitle2" fontWeight="bold" sx={{ fontSize: '0.78rem' }}>
+                                        No. of Students Appeared: {stats.appeared}
+                                    </Typography>
+                                    <Typography variant="subtitle2" fontWeight="bold" sx={{ fontSize: '0.78rem', color: '#2e7d32' }}>
+                                        No. of Students Passed: {stats.passed}
+                                    </Typography>
+                                    <Typography variant="subtitle2" fontWeight="bold" sx={{ fontSize: '0.78rem', color: '#d32f2f' }}>
+                                        No. of Students Failed: {stats.failed}
+                                    </Typography>
+                                    <Typography variant="subtitle2" fontWeight="bold" sx={{ fontSize: '0.78rem', color: '#ed6c02' }}>
+                                        No. of Students Absent: {stats.absent}
+                                    </Typography>
+                                </Box>
+
+                                {/* Signatures */}
+                                <Box sx={{ mt: 8, display: 'flex', justifyContent: 'space-between', px: 4 }}>
+                                    <Typography variant="subtitle2" fontWeight="bold">
+                                        ExamCell-Incharge
+                                    </Typography>
+                                    <Typography variant="subtitle2" fontWeight="bold">
+                                        Head Of The Department (HOD)
+                                    </Typography>
+                                </Box>
+                            </>
                         )}
 
                         {/* Page Number footer */}
