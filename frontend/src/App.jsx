@@ -30,6 +30,7 @@ import Dashboard from './pages/Dashboard';
 import Analytics from './pages/Analytics';
 import SubjectDetail from './pages/SubjectDetail';
 import UploadZone from './components/UploadZone';
+import LandingPage from './pages/LandingPage';
 
 const drawerWidth = 240;
 
@@ -150,15 +151,17 @@ const App = () => {
 
     return (
         <Router>
-            <Layout data={data} onUpload={setData}>
-                <Routes>
-                    <Route path="/" element={
-                        data ? <Dashboard data={data} /> : <UploadZone onUpload={setData} />
-                    } />
-                    <Route path="/analytics" element={<Analytics data={data} />} />
-                    <Route path="/subject/:subjectName" element={<SubjectDetail data={data} />} />
-                </Routes>
-            </Layout>
+            {!data ? (
+                <LandingPage onUpload={setData} />
+            ) : (
+                <Layout data={data} onUpload={setData}>
+                    <Routes>
+                        <Route path="/" element={<Dashboard data={data} />} />
+                        <Route path="/analytics" element={<Analytics data={data} />} />
+                        <Route path="/subject/:subjectName" element={<SubjectDetail data={data} />} />
+                    </Routes>
+                </Layout>
+            )}
         </Router>
     );
 };
