@@ -385,21 +385,24 @@ const SubjectDetail = ({ data }) => {
                         </Box>
 
                         <Box sx={{ pb: 2 }}>
-                            <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 0.5 }}>
-                                Branch: {data?.metadata?.branch || 'N/A'}
-                            </Typography>
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 0.5 }}>
                                 <Typography variant="subtitle2" fontWeight="bold">
-                                    Course/Sem: {data?.metadata?.courseSem || 'N/A'}
+                                    Branch: {data?.metadata?.branch || 'N/A'}
                                 </Typography>
                                 <Typography variant="subtitle2" fontWeight="bold">
                                     Held in: {data?.metadata?.heldIn || 'N/A'}
                                 </Typography>
                             </Box>
+                            <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 0.5 }}>
+                                Sem: {data?.metadata?.courseSem || 'N/A'}
+                            </Typography>
+                            <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 1.5 }}>
+                                Course: {subject}
+                            </Typography>
                         </Box>
 
-                        <Box sx={{ textAlign: 'center', mb: 2 }}>
-                            <Typography variant="h5" fontWeight="bold" color="primary" sx={{ borderBottom: '2px solid', display: 'inline-block', px: 4, pb: 0.5 }}>
+                        <Box sx={{ textAlign: 'center', mb: 1.5 }}>
+                            <Typography variant="subtitle1" fontWeight="bold" color="primary" sx={{ borderBottom: '1.5px solid', display: 'inline-block', px: 3, pb: 0.3, fontSize: '0.95rem', letterSpacing: '0.5px' }}>
                                 {subject} - Report
                             </Typography>
                         </Box>
